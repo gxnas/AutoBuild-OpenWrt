@@ -1,0 +1,115 @@
+name: Build_x86_64_test
+
+on: 
+  release:
+    types: [published]
+
+  push:
+    branches: 
+      - master
+    paths:
+      - '.github/workflows/Build_OP_x86_64_test.yml'
+
+  schedule:
+    - cron: 0 7 * * 6
+  
+  watch:
+    types: [started]
+
+jobs:
+  build:
+    runs-on: Ubuntu-18.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@master
+
+    - name: Initialization environment
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        docker rmi `docker images -q`
+        echo "Deleting files, please wait ..."
+        sudo rm -rf \
+          /usr/share/dotnet \
+          /etc/mysql \
+          /etc/php
+        sudo -E apt-get -y purge \
+          azure-cli \
+          ghc* \
+          zulu* \
+          hhvm \
+          llvm* \
+          firefox \
+          google* \
+          dotnet* \
+          powershell \
+          openjdk* \
+          mysql* \
+          php*
+        sudo -E apt-get update
+        sudo -E apt-get -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3.5 unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler g++-multilib antlr3 gperf
+        sudo -E apt-get -y autoremove --purge
+        sudo -E apt-get clean
+        
+    - name: Clone source code
+      env: 
+        REPO_URL: https://github.com/coolsnowwolf/lede
+        REPO_BRANCH: master
+      run: git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
+
+    - name: Update & Install feeds
+      working-directory: ./openwrt
+      run: |
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+        
+    - name: Import external feeds
+      working-directory: ./openwrt
+      run: |
+        cd package
+        git clone https://github.com/kenzok8/small.git package/kenzok8
+        git clone https://github.com/kenzok8/openwrt-packages.git package/kenzok8
+        git clone https://github.com/281677160/openwrt-package package/281677160
+        
+    - name: Configuration Customization - x86_64_test.config
+      env:
+        CONFIG_FILE: 'x86_64_test.config'
+      run: |
+        [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
+        chmod +x ./customize.sh && ./customize.sh
+        cd openwrt && make defconfig
+    
+    - name: Download package
+      working-directory: ./openwrt
+      run: |
+        make download -j$(nproc)
+        find dl -size -1024c -exec ls -l {} \;
+        find dl -size -1024c -exec rm -f {} \;
+        
+    - name: Build firmware
+      working-directory: ./openwrt
+      run: |
+        echo -e "$(nproc) thread build."
+        make -j$(nproc) V=s
+     
+    - name: Prepare artifact
+      run: |
+        find  ./openwrt/bin/targets/ -type f -name "*rootfs*" | xargs rm -rf {}
+        cd ./openwrt/bin/targets/x86/64
+        rm -rf `ls | grep -v "openwrt-x86-64-generic-squashfs-combined.img"`
+        # gzip -d *.gz
+        gzip *.img
+        df -h
+    
+    - name: Upload firmware
+      uses: actions/upload-artifact@master
+      with:
+        name: OpenWrt_x86_64_test
+        path: ./openwrt/bin/targets/
+
+    - name: Delete workflow runs
+      uses: GitRML/delete-workflow-runs@main
+      with:
+        retain_days: 30
+        keep_minimum_runs: 4
