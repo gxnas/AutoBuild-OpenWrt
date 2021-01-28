@@ -1,7 +1,3 @@
-sed -i '$a src-git small https://github.com/kenzok8/small' feeds.conf.default
-sed -i '$a src-git kenzo https://github.com/kenzok8/openwrt-packages' feeds.conf.default
-sed -i '$a src-git 281677160 https://github.com/281677160/openwrt-package' feeds.conf.default
-
 # 修改openwrt登陆地址,把下面的192.168.2.2修改成你想要的就可以了
 #sed -i 's/192.168.1.1/192.168.1.11/g' openwrt/package/base-files/files/bin/config_generate
 
