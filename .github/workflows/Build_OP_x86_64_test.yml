@@ -68,9 +68,9 @@ jobs:
       working-directory: ./openwrt
       run: |
         cd package
-        git clone https://github.com/kenzok8/small.git package/kenzok8
-        git clone https://github.com/kenzok8/openwrt-packages.git package/kenzok8
-        git clone https://github.com/281677160/openwrt-package package/281677160
+        git clone https://github.com/kenzok8/small.git
+        git clone https://github.com/kenzok8/openwrt-packages.git
+        git clone https://github.com/281677160/openwrt-package.git
         
     - name: Configuration Customization - x86_64_test.config
       env:
