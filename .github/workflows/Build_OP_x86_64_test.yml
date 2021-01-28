@@ -68,9 +68,10 @@ jobs:
       working-directory: ./openwrt
       run: |
         cd package
-        git clone https://github.com/kenzok8/small.git
-        git clone https://github.com/kenzok8/openwrt-packages.git
-        git clone https://github.com/281677160/openwrt-package.git
+        mkdir gxnas-packages
+        git clone https://github.com/kenzok8/small.git gxnas-packages
+        git clone https://github.com/kenzok8/openwrt-packages.git gxnas-packages
+        git clone https://github.com/281677160/openwrt-package.git gxnas-packages
         
     - name: Configuration Customization - x86_64_test.config
       env:
