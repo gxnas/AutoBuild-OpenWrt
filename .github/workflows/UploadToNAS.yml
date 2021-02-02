@@ -9,9 +9,6 @@ on:
         required: false
         default: 'false'
   
-  release:
-    types: [published]
-
   push:
     branches: 
       - master
