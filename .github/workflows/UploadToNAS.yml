@@ -24,7 +24,7 @@ env:
   ftp_psw: ${{ secrets.FTP_PSW }}
   ftp_ip: ${{ secrets.FTP_IP }}
   ftp_port: ${{ secrets.FTP_PORT }}
-  TargetPath: openwrt
+  TargetPath: jd_script
   upload_file_1: FixSynoboot.sh
 
 jobs:
@@ -42,7 +42,7 @@ jobs:
         #echo $ftp_psw >> /tmp/rsync.psw 
         #chmod 600 /tmp/rsync.psw
         #rsync -azvP -e $ftp_port --password-file=/tmp/rsync.psw $upload_file_1 rsync://$ftp_username@$ftp_ip:/$TargetPath/
-        sshpass -p $ftp_psw scp -P $ftp_port $upload_file_1 $ftp_username@$ftp_ip:$upload_file_1
+        sshpass -p $ftp_psw scp -P $ftp_port -r $upload_file_1 $ftp_username@$ftp_ip:$TargetPath
         echo "All Released Files Uploaded to GXNAS"
 
     - name: WeChat notification
