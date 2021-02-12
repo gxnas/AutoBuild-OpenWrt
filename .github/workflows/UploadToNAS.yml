@@ -42,7 +42,8 @@ jobs:
         #echo $ftp_psw >> /tmp/rsync.psw 
         #chmod 600 /tmp/rsync.psw
         #rsync -azvP -e $ftp_port --password-file=/tmp/rsync.psw $upload_file_1 rsync://$ftp_username@$ftp_ip:/$TargetPath/
-        sshpass -p $ftp_psw scp -P $ftp_port -r $upload_file_1 $ftp_username@$ftp_ip:$TargetPath
+        #sshpass -p $ftp_psw scp -P $ftp_port -r $upload_file_1 $ftp_username@$ftp_ip:$TargetPath
+        curl -T $upload_file_1 ftp://$ftp_username:$ftp_psw@$ftp_ip:$ftp_port/$TargetPath
         echo "All Released Files Uploaded to GXNAS"
 
     - name: WeChat notification
